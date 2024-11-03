@@ -1,7 +1,8 @@
 import 'dart:ffi';
 
 class ProductModel {
-  int? id;
+  String? referenceId;
+  String? id;
   String? name;
   String? code;
   String? image;
@@ -12,19 +13,19 @@ class ProductModel {
   double? price;
   String? backgroundColor;
   List<dynamic>? varriants;
-  ProductModel({
-    this.code,
-    this.id,
-    this.backgroundColor,
-    this.name,
-    this.qty,
-    this.price,
-    this.favorite,
-    this.description,
-    this.size,
-    this.image,
-    this.varriants,
-  });
+  ProductModel(
+      {this.code,
+      this.id,
+      this.backgroundColor,
+      this.name,
+      this.qty,
+      this.price,
+      this.favorite,
+      this.description,
+      this.size,
+      this.image,
+      this.varriants,
+      this.referenceId});
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -33,21 +34,23 @@ class ProductModel {
       'description': description,
       'favorite': favorite,
       'qty': qty,
-      'size': size,
+      'size': size as double,
       'image': image,
       'code': code,
-      'varriant_colors': varriants as List<String>,
+      'varriant_colors': varriants,
       'background_color': backgroundColor,
     };
   }
 
-  ProductModel.fromMap({required Map<String, dynamic> map})
-      : id = map['id'] as int,
+  ProductModel.fromMap(
+      {required Map<String, dynamic> map, required String? docId})
+      : referenceId = docId,
+        id = map['id'].toString(),
         name = map['name'] as String,
         price = double.parse(map['price'].toString()),
         code = map['code'] as String,
         qty = map['qty'] as int,
-        size = double.parse(map['size'].toString()),
+        size = double.parse((map['size'] ?? 0.0).toString()),
         image = map['image'] as String,
         backgroundColor = map['background_color'] as String,
         description = map['description'] as String,

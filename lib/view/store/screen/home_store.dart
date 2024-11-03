@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_app/model/product_model.dart';
+import 'package:firebase_app/view/auth/firebase/firebase_data_con.dart';
 import 'package:firebase_app/view/auth/firebase/intergration_firebase.dart';
 import 'package:firebase_app/view/auth/screen/login.dart';
 import 'package:firebase_app/view/store/screen/product/detail_product.dart';
@@ -9,6 +10,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
 import 'package:hexcolor/hexcolor.dart';
+
+import 'shop/account_shop.dart';
 
 class HomeStoreScreen extends StatefulWidget {
   const HomeStoreScreen({super.key});
@@ -28,6 +31,22 @@ class _HomeStoreScreenState extends State<HomeStoreScreen> {
           child: Column(
             children: [
               ListTile(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const HomeShop(),
+                      ));
+                },
+                leading: Icon(Icons.store),
+                title: Text('SHOP'),
+                trailing: Icon(
+                  Icons.arrow_forward_ios,
+                  size: 20,
+                ),
+              ),
+              Spacer(),
+              ListTile(
                 onTap: () async {
                   await FirebaseController().logOutUser().then((value) {
                     Navigator.pushAndRemoveUntil(
@@ -40,7 +59,7 @@ class _HomeStoreScreenState extends State<HomeStoreScreen> {
                 },
                 title: const Text('Log Out'),
                 trailing: const Icon(Icons.logout),
-              )
+              ),
             ],
           ),
         ),
@@ -70,7 +89,8 @@ class _HomeStoreScreenState extends State<HomeStoreScreen> {
                           return buildProductCard(
                               pro: ProductModel.fromMap(
                                   map: snapshot.data!.docs[index].data()
-                                      as Map<String, dynamic>));
+                                      as Map<String, dynamic>,
+                                  docId: snapshot.data!.docs[index].id));
                         },
                         separatorBuilder: (BuildContext context, int index) {
                           return const Divider(
@@ -85,6 +105,7 @@ class _HomeStoreScreenState extends State<HomeStoreScreen> {
   }
 
   Widget buildProductCard({required ProductModel pro}) {
+    ProductModel productModel = pro;
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -109,9 +130,20 @@ class _HomeStoreScreenState extends State<HomeStoreScreen> {
               ),
               title: Text(pro.name!),
               subtitle: Text(DateTime.now().toString()),
-              trailing: Icon(
-                pro.favorite! ? Icons.favorite : Icons.favorite_border,
-                color: pro.favorite! ? Colors.red : Colors.black,
+              trailing: GestureDetector(
+                onTap: () async {
+                  setState(() {
+                    productModel.favorite = !productModel.favorite!;
+                  });
+                  await CloudFireStoreController()
+                      .addFavoriteProduuct(pro: productModel);
+                },
+                child: Icon(
+                  productModel.favorite!
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  color: productModel.favorite! ? Colors.red : Colors.black,
+                ),
               ),
             ),
             Hero(
